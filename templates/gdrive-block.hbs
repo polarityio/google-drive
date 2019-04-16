@@ -1,1 +1,6 @@
-{{object-to-table block.data.details}}
+<span class="p-title">{{fa-icon "file" fixedWidth=true}} Files</span>
+{{#each details as |file|}}
+    <div class="file">
+        {{fa-icon file.icon class="doc-type" fixedWidth=true}}<a href="https://docs.google.com/document/d/{{file.id}}/edit">{{file.name}}{{fa-icon "external-link-alt" class="external-icon" fixedWidth=true}}</a>
+    </div>
+{{/each}}

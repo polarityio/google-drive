@@ -50,6 +50,14 @@ module.exports = {
             file: "./templates/gdrive-block.hbs"
         }
     },
+    summary: {
+        component: {
+            file: './components/gdrive-summary.js'
+        },
+        template: {
+            file: './templates/gdrive-summary.hbs'
+        }
+    },
     auth:{
         // Path to google drive private key file
         key: './key/privatekey.json'
