@@ -1,3 +1,5 @@
+> This integration is under development and is not yet ready for use.
+
 # Polarity Google Drive Integration
 
 Polarity's Google Drive integration gives users the ability to search files stored in a specified Google drive folder.  This integration leverages the v2 drive API.
