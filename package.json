@@ -1,0 +1,13 @@
+{
+  "main": "./integration.js",
+  "name": "gdrive",
+  "version": "3.0.0-beta",
+  "private": true,
+  "dependencies": {
+    "async": "^2.6.2",
+    "googleapis": "37.2.0"
+  },
+  "scripts": {
+    "test": "./node_modules/.bin/mocha --recursive"
+  }
+}
