@@ -36,15 +36,24 @@ Next we need to enable the API which will be used with this service account. To 
 
 SSH into to the Polarity Server as root and navigate to the Google Drive integration subdirectory:
 
+```
 cd /app/polarity-server/integrations/google-drive/
+```
 
 Create a new directory named `key` and upload the service account key created in Step 1 above, or optionally copy the contents of the key file into a new file named `privatekey.json`.  After the key file has uploaded or created, make the `key` directory and it's contents owned by the polarityd user:
 
+```
 chown -R polarityd:polarityd /app/polarity-server/integrations/google-drive/key/
+```
 
-***PLEASE NOTE: If the key file is not explicitly named `privatekey.json` or placed in an alternate location, the integration configuration file (config.js) needs to be modified to reflect this change.***
+> PLEASE NOTE: If the key file is not explicitly named `privatekey.json` or is placed in an alternate location, the integration configuration file (config.js) needs to be modified to reflect this change.
 
-![image](images/readme3.png)
+```
+auth:{
+    // Path to google drive private key file
+    key: './key/privatekey.json'
+}
+```
 
 ## About Polarity
 
