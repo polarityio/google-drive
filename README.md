@@ -16,8 +16,6 @@ Installation instructions for integrations are provided on the [PolarityIO GitHu
 
 You will need to configure a Google service account key and perform the following steps.
 
-### Google Drive Configuration Steps
-
 ### Create the Project and Service Account
 
 Before you can use the Polarity Google Drive Integration you will need to go to the [Google Developers Console](https://console.developers.google.com/) and create a new project. Provide a name for your project and an ID, which can be generated as well.
@@ -34,7 +32,7 @@ Next we need to enable the API which will be used with this service account. To 
 
 #### Transfer Service Account Key to Polarity server
 
-SSH into to the Polarity Server as root and navigate to the Google Drive integration subdirectory:
+SSH into the Polarity Server as root and navigate to the Google Drive integration subdirectory:
 
 ```
 cd /app/polarity-server/integrations/google-drive/
