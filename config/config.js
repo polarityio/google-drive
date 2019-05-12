@@ -23,7 +23,7 @@ module.exports = {
      * @optional
      */
     description: "Google Drive Integration for Entity Searching",
-    entityTypes: ['*'],
+    entityTypes: ['ip', 'email', 'domain', 'hash'],
     /**
      * An array of style files (css or less) that will be included for your integration. Any styles specified in
      * the below files can be used in your custom template.
@@ -81,5 +81,43 @@ module.exports = {
     },
     logging: {
         level: 'info',  //trace, debug, info, warn, error, fatal
-    }
+    },
+    "options": [
+        {
+            key: 'searchScope',
+            name: 'Search Scope',
+            description: 'Choose a search scope for the integration which dictates what files or Team Drives will be searched.',
+            default: {
+                value: 'default',
+                display: '[default] Search specific files the service user has access to'
+            },
+            type: 'select',
+            options: [
+                {
+                    value: 'default',
+                    display: '[default] Search specific files the service user has access to'
+                },
+                {
+                    value: 'drive',
+                    display: '[drive] Search the specified Team Drive ID (must fill in the `Drive ID to Search` option)'
+                },
+                {
+                    value: 'allDrives',
+                    display: '[allDrives] Search all Team Drives the service user has access to'
+                }
+            ],
+            multiple: false,
+            userCanEdit: true,
+            adminOnly: false
+        },
+        {
+            "key": "driveId",
+            "name": "Drive ID to Search",
+            "description": "The ID of the Team Drive to search.  This option only has an effect if the `Search Scope` option is set to `[drive] Search the specified Team Drive ID`",
+            "default": "",
+            "type": "text",
+            "userCanEdit": true,
+            "adminOnly": false
+        }
+    ]
 };
