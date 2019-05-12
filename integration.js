@@ -77,7 +77,8 @@ function doLookup(entities, options, cb) {
             });
           } else {
             files.forEach((file) => {
-              file.icon = mimeTypes[file.mimeType] ? mimeTypes[file.mimeType] : DEFAULT_FILE_ICON;
+              file._icon = mimeTypes[file.mimeType] ? mimeTypes[file.mimeType] : DEFAULT_FILE_ICON;
+              file._typeForUrl = getTypeForUrl(file);
             });
 
             lookupResults.push({
@@ -97,6 +98,17 @@ function doLookup(entities, options, cb) {
       }
     );
   });
+}
+
+function getTypeForUrl(file){
+  if(file.mimeType === 'application/vnd.google-apps.presentation'){
+    return 'presentation';
+  }
+  if(file.mimeType === 'application/vnd.google-apps.spreadsheet'){
+    return 'spreadsheets';
+  }
+
+  return 'document';
 }
 
 function getSearchOptions(entity, options) {
