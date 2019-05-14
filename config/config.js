@@ -113,7 +113,7 @@ module.exports = {
         {
             "key": "driveId",
             "name": "Drive ID to Search",
-            "description": "The ID of the Team Drive to search.  This option only has an effect if the `Search Scope` option is set to `[drive] Search the specified Team Drive ID`",
+            "description": "The ID of the Team Drive to search.  This option only has an effect if the `Search Scope` option is set to `[Specific Drive]`",
             "default": "",
             "type": "text",
             "userCanEdit": true,

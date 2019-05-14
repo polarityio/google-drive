@@ -64,7 +64,7 @@ The search scope for the integration dictates which files or Tream Drives will b
 If this option is selected the integration will only search files that have been explicitly shared with the service user email address.
 
 > Team Drive does not support sharing folders.  If you want to share all files under a folder you will need to add the service user
-to the entire Team Drive and then choose the [drive] or [allDrives] options.
+to the entire Team Drive and then choose the [Specific Drive] or [All Drives] options.
 
 * [Specific Drive] Search the specified Team Drive ID (must fill in the `Drive ID to Search` option)
 
@@ -81,7 +81,12 @@ The drive ID here is `0BLCYu7N598nTUk9PVA`.
 
 * [All Drives] Search all Team Drives the service user has access to
 
-If selected, the service user will search all drives they've been access to.  
+If selected, the service user will search all drives they've been access to.
+
+
+#### Drive ID to Search
+
+The ID of the Team Drive to search.  This option only has an effect if the `Search Scope` option is set to `[Specific Drive]`
 
 ## About Polarity
 
