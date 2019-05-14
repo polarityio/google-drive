@@ -89,21 +89,21 @@ module.exports = {
             description: 'Choose a search scope for the integration which dictates what files or Team Drives will be searched.',
             default: {
                 value: 'default',
-                display: '[default] Search specific files the service user has access to'
+                display: '[Default] Search specific files the service user has access to'
             },
             type: 'select',
             options: [
                 {
                     value: 'default',
-                    display: '[default] Search specific files the service user has access to'
+                    display: '[Default] Search specific files the service user has access to'
                 },
                 {
                     value: 'drive',
-                    display: '[drive] Search the specified Team Drive ID (must fill in the `Drive ID to Search` option)'
+                    display: '[Specific Drive] Search the specified Team Drive ID (must fill in the `Drive ID to Search` option)'
                 },
                 {
                     value: 'allDrives',
-                    display: '[allDrives] Search all Team Drives the service user has access to'
+                    display: '[All Drives] Search all Team Drives the service user has access to'
                 }
             ],
             multiple: false,
