@@ -53,6 +53,36 @@ auth:{
 }
 ```
 
+## Integration Options
+
+#### Search Scope
+
+The search scope for the integration dictates which files or Tream Drives will be searched.  There are three possible options:
+
+* [Default] Search specific files the service user has access to
+
+If this option is selected the integration will only search files that have been explicitly shared with the service user email address.
+
+> Team Drive does not support sharing folders.  If you want to share all files under a folder you will need to add the service user
+to the entire Team Drive and then choose the [drive] or [allDrives] options.
+
+* [Specific Drive] Search the specified Team Drive ID (must fill in the `Drive ID to Search` option)
+
+Search the specific drive specified by the `Drive ID to Search` option (see below).  If this option is selected, you must provide the
+Drive ID to search.  The Drive ID can be determined by looking at the Team Drive URL in your browser.
+
+```
+https://drive.google.com/drive/u/1/folders/0BLCYu7N598nTUk9PVA
+```
+
+The drive ID here is `0BLCYu7N598nTUk9PVA`.
+
+> Note that the service user must be given access to the specified Team Drive.
+
+* [All Drives] Search all Team Drives the service user has access to
+
+If selected, the service user will search all drives they've been access to.  
+
 ## About Polarity
 
 Polarity is a memory-augmentation platform that improves and accelerates analyst decision making.  For more information about the Polarity platform please see:
