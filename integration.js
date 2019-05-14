@@ -100,11 +100,11 @@ function doLookup(entities, options, cb) {
   });
 }
 
-function getTypeForUrl(file){
-  if(file.mimeType === 'application/vnd.google-apps.presentation'){
+function getTypeForUrl(file) {
+  if (file.mimeType === 'application/vnd.google-apps.presentation') {
     return 'presentation';
   }
-  if(file.mimeType === 'application/vnd.google-apps.spreadsheet'){
+  if (file.mimeType === 'application/vnd.google-apps.spreadsheet') {
     return 'spreadsheets';
   }
 
@@ -157,7 +157,26 @@ function startup(logger) {
   jwtClient = new google.auth.JWT(privateKey.client_email, null, privateKey.private_key, [DRIVE_AUTH_URL]);
 }
 
+function validateOptions(userOptions, cb) {
+  let errors = [];
+
+  Logger.info(userOptions);
+
+  let searchScope = userOptions.searchScope.value.value;
+  let driveId = userOptions.driveId.value;
+
+  if (searchScope === 'drive' && typeof driveId === 'string' && driveId.length === 0) {
+    errors.push({
+      key: 'driveId',
+      message: 'You must provide a `Drive ID to Search` if you set a `Search Scope` of [drive]'
+    });
+  }
+
+  cb(null, errors);
+}
+
 module.exports = {
   doLookup: doLookup,
-  startup: startup
+  startup: startup,
+  validateOptions: validateOptions
 };
