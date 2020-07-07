@@ -1,8 +1,4 @@
-> This integration is under development and is not yet ready for use.
-
 # Polarity Google Drive Integration
-
-![image](https://img.shields.io/badge/status-beta-green.svg)
 
 Polarity's Google Drive integration gives users the ability to search files stored in a specified Google drive folder. This integration leverages the v3 drive API.
 
