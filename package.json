@@ -5,7 +5,7 @@
   "private": true,
   "dependencies": {
     "async": "^2.6.2",
-    "googleapis": "37.2.0"
+    "googleapis": "59.0.0"
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha --recursive"
