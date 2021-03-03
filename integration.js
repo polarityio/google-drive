@@ -3,6 +3,7 @@
 const { google } = require('googleapis');
 const async = require('async');
 const config = require('./config/config');
+const gaxios = require('gaxios');
 const privateKey = require(config.auth.key);
 const DRIVE_AUTH_URL = 'https://www.googleapis.com/auth/drive';
 
@@ -43,7 +44,7 @@ function doLookup(entities, options, cb) {
   let lookupResults = [];
 
   //authenticate request
-  jwtClient.authorize(function(err, tokens) {
+  jwtClient.authorize(function (err, tokens) {
     if (err) {
       Logger.error({ err: err }, 'Failed to authorize client');
       return cb({
@@ -56,8 +57,7 @@ function doLookup(entities, options, cb) {
       entities,
       (entity, done) => {
         let drive = google.drive({ version: 'v3', auth: jwtClient });
-
-        drive.files.list(getSearchOptions(entity, options), (err, response) => {
+        drive.files.list(getSearchOptions(entity, options), async (err, response) => {
           if (err) {
             Logger.error({ err: err }, 'Error listing files');
             return done({
@@ -76,10 +76,15 @@ function doLookup(entities, options, cb) {
               data: null
             });
           } else {
-            files.forEach((file) => {
+            for await (let file of files) {
               file._icon = mimeTypes[file.mimeType] ? mimeTypes[file.mimeType] : DEFAULT_FILE_ICON;
               file._typeForUrl = getTypeForUrl(file);
-            });
+              try {
+                file._thumbnailBase64 = await downloadThumbnail(tokens.access_token, file.thumbnailLink);
+              } catch (thumbnailError) {
+                Logger.error(thumbnailError, 'Error getting thumbnail');
+              }
+            }
 
             lookupResults.push({
               entity: entity,
@@ -100,6 +105,19 @@ function doLookup(entities, options, cb) {
   });
 }
 
+async function downloadThumbnail(authToken, thumbnailUrl) {
+  const requestOptions = {
+    url: thumbnailUrl,
+    encoding: null,
+    headers: {
+      Authorization: `Bearer ${authToken}`
+    },
+    responseType: 'arraybuffer'
+  };
+  const response = await gaxios.request(requestOptions);
+  return `data:image/png;charset=utf-8;base64,${Buffer.from(response.data, 'binary').toString('base64')}`;
+}
+
 function getTypeForUrl(file) {
   if (file.mimeType === 'application/vnd.google-apps.presentation') {
     return 'presentation';
@@ -117,7 +135,9 @@ function getSearchOptions(entity, options) {
       return {
         includeTeamDriveItems: true,
         supportsTeamDrives: true,
-        q: `fullText contains '${entity.value}'`
+        q: `fullText contains '${entity.value}'`,
+        fields:
+          'files(mimeType),files(id),files(name),files(hasThumbnail),files(thumbnailLink),files(lastModifyingUser(displayName)),files(lastModifyingUser(photoLink)),files(iconLink)'
       };
     case 'drive':
       return {
@@ -125,14 +145,18 @@ function getSearchOptions(entity, options) {
         includeItemsFromAllDrives: true,
         corpora: 'drive',
         driveId: options.driveId,
-        q: `fullText contains '${entity.value}'`
+        q: `fullText contains '${entity.value}'`,
+        fields:
+          'files(mimeType),files(id),files(name),files(hasThumbnail),files(thumbnailLink),files(lastModifyingUser(displayName)),files(lastModifyingUser(photoLink)),files(iconLink)'
       };
     case 'allDrives': {
       return {
         supportsAllDrives: true,
         includeItemsFromAllDrives: true,
         corpora: 'allDrives',
-        q: `fullText contains '${entity.value}'`
+        q: `fullText contains '${entity.value}'`,
+        fields:
+          'files(mimeType),files(id),files(name),files(hasThumbnail),files(thumbnailLink),files(lastModifyingUser(displayName)),files(lastModifyingUser(photoLink)),files(iconLink)'
       };
     }
   }
@@ -159,8 +183,6 @@ function startup(logger) {
 
 function validateOptions(userOptions, cb) {
   let errors = [];
-
-  Logger.info(userOptions);
 
   let searchScope = userOptions.searchScope.value.value;
   let driveId = userOptions.driveId.value;
