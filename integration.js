@@ -6,6 +6,7 @@ const config = require('./config/config');
 const gaxios = require('gaxios');
 const privateKey = require(config.auth.key);
 const DRIVE_AUTH_URL = 'https://www.googleapis.com/auth/drive';
+const MAX_PARALLEL_THUMBNAIL_DOWNLOADS = 10;
 
 const mimeTypes = {
   'application/vnd.google-apps.audio': 'file-audio',
@@ -76,17 +77,19 @@ function doLookup(entities, options, cb) {
               data: null
             });
           } else {
-            for await (let file of files) {
-              file._icon = mimeTypes[file.mimeType] ? mimeTypes[file.mimeType] : DEFAULT_FILE_ICON;
-              file._typeForUrl = getTypeForUrl(file);
+            // For each file, if it has a thumbnail, download the thumbnail
+            await async.eachOfLimit(files, MAX_PARALLEL_THUMBNAIL_DOWNLOADS, async (file) => {
               try {
+                file._icon = mimeTypes[file.mimeType] ? mimeTypes[file.mimeType] : DEFAULT_FILE_ICON;
+                file._typeForUrl = getTypeForUrl(file);
                 if (file.hasThumbnail) {
                   file._thumbnailBase64 = await downloadThumbnail(tokens.access_token, file.thumbnailLink);
                 }
-              } catch (thumbnailError) {
-                Logger.error(thumbnailError, 'Error getting thumbnail');
+              } catch (downloadErr) {
+                Logger.error(downloadErr, 'Error downloading thumbnail');
+                file._thumbnailError = downloadErr;
               }
-            }
+            });
 
             lookupResults.push({
               entity: entity,
@@ -110,7 +113,6 @@ function doLookup(entities, options, cb) {
 async function downloadThumbnail(authToken, thumbnailUrl) {
   const requestOptions = {
     url: thumbnailUrl,
-    encoding: null,
     headers: {
       Authorization: `Bearer ${authToken}`
     },
