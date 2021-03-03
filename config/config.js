@@ -24,6 +24,7 @@ module.exports = {
    */
   description: 'Google Drive Integration for Entity Searching',
   entityTypes: ['ip', 'email', 'domain', 'hash'],
+  defaultColor: 'light-gray',
   /**
    * An array of style files (css or less) that will be included for your integration. Any styles specified in
    * the below files can be used in your custom template.
