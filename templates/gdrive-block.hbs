@@ -13,7 +13,7 @@
             <img src="{{file.iconLink}}" class="file-icon"/> <a href="https://docs.google.com/file/d/{{file.id}}/view">{{file.name}}{{fa-icon "external-link-alt" class="external-icon" fixedWidth=true}}</a>
           </div>
           <div>
-            <span class="file-meta">Last modified by {{file.lastModifyingUser.displayName}}</span>
+            <span class="file-meta">Last modified by {{file.lastModifyingUser.displayName}} {{moment-from file.modifiedTime}}</span>
           </div>
           {{!--
           <img class="last-updated-photo" src="{{file.lastModifyingUser.photoLink}}"/>

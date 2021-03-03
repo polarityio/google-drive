@@ -80,7 +80,7 @@ function doLookup(entities, options, cb) {
               file._icon = mimeTypes[file.mimeType] ? mimeTypes[file.mimeType] : DEFAULT_FILE_ICON;
               file._typeForUrl = getTypeForUrl(file);
               try {
-                if(file.hasThumbnail){
+                if (file.hasThumbnail) {
                   file._thumbnailBase64 = await downloadThumbnail(tokens.access_token, file.thumbnailLink);
                 }
               } catch (thumbnailError) {
@@ -139,7 +139,7 @@ function getSearchOptions(entity, options) {
         supportsTeamDrives: true,
         q: `fullText contains '${entity.value}'`,
         fields:
-          'files(mimeType),files(id),files(name),files(hasThumbnail),files(thumbnailLink),files(lastModifyingUser(displayName)),files(lastModifyingUser(photoLink)),files(iconLink)'
+          'files(modifiedTime),files(mimeType),files(id),files(name),files(hasThumbnail),files(thumbnailLink),files(lastModifyingUser(displayName)),files(lastModifyingUser(photoLink)),files(iconLink)'
       };
     case 'drive':
       return {
@@ -149,7 +149,7 @@ function getSearchOptions(entity, options) {
         driveId: options.driveId,
         q: `fullText contains '${entity.value}'`,
         fields:
-          'files(mimeType),files(id),files(name),files(hasThumbnail),files(thumbnailLink),files(lastModifyingUser(displayName)),files(lastModifyingUser(photoLink)),files(iconLink)'
+          'files(modifiedTime),files(mimeType),files(id),files(name),files(hasThumbnail),files(thumbnailLink),files(lastModifyingUser(displayName)),files(lastModifyingUser(photoLink)),files(iconLink)'
       };
     case 'allDrives': {
       return {
@@ -157,8 +157,8 @@ function getSearchOptions(entity, options) {
         includeItemsFromAllDrives: true,
         corpora: 'allDrives',
         q: `fullText contains '${entity.value}'`,
-        fields:'*'
-          //'files(mimeType),files(id),files(name),files(hasThumbnail),files(thumbnailLink),files(lastModifyingUser(displayName)),files(lastModifyingUser(photoLink)),files(iconLink)'
+        fields:
+          'files(modifiedTime),files(mimeType),files(id),files(name),files(hasThumbnail),files(thumbnailLink),files(lastModifyingUser(displayName)),files(lastModifyingUser(photoLink)),files(iconLink)'
       };
     }
   }
