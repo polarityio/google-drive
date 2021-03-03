@@ -80,7 +80,9 @@ function doLookup(entities, options, cb) {
               file._icon = mimeTypes[file.mimeType] ? mimeTypes[file.mimeType] : DEFAULT_FILE_ICON;
               file._typeForUrl = getTypeForUrl(file);
               try {
-                file._thumbnailBase64 = await downloadThumbnail(tokens.access_token, file.thumbnailLink);
+                if(file.hasThumbnail){
+                  file._thumbnailBase64 = await downloadThumbnail(tokens.access_token, file.thumbnailLink);
+                }
               } catch (thumbnailError) {
                 Logger.error(thumbnailError, 'Error getting thumbnail');
               }
@@ -155,8 +157,8 @@ function getSearchOptions(entity, options) {
         includeItemsFromAllDrives: true,
         corpora: 'allDrives',
         q: `fullText contains '${entity.value}'`,
-        fields:
-          'files(mimeType),files(id),files(name),files(hasThumbnail),files(thumbnailLink),files(lastModifyingUser(displayName)),files(lastModifyingUser(photoLink)),files(iconLink)'
+        fields:'*'
+          //'files(mimeType),files(id),files(name),files(hasThumbnail),files(thumbnailLink),files(lastModifyingUser(displayName)),files(lastModifyingUser(photoLink)),files(iconLink)'
       };
     }
   }
