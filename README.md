@@ -1,5 +1,3 @@
-> This integration is under development and is not yet ready for use.
-
 # Polarity Google Drive Integration
 
 ![image](https://img.shields.io/badge/status-beta-green.svg)
