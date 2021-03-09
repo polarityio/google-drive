@@ -3,8 +3,10 @@
 const { google } = require('googleapis');
 const async = require('async');
 const config = require('./config/config');
+const gaxios = require('gaxios');
 const privateKey = require(config.auth.key);
 const DRIVE_AUTH_URL = 'https://www.googleapis.com/auth/drive';
+const MAX_PARALLEL_THUMBNAIL_DOWNLOADS = 10;
 
 const mimeTypes = {
   'application/vnd.google-apps.audio': 'file-audio',
@@ -43,7 +45,7 @@ function doLookup(entities, options, cb) {
   let lookupResults = [];
 
   //authenticate request
-  jwtClient.authorize(function(err, tokens) {
+  jwtClient.authorize(function (err, tokens) {
     if (err) {
       Logger.error({ err: err }, 'Failed to authorize client');
       return cb({
@@ -56,8 +58,7 @@ function doLookup(entities, options, cb) {
       entities,
       (entity, done) => {
         let drive = google.drive({ version: 'v3', auth: jwtClient });
-
-        drive.files.list(getSearchOptions(entity, options), (err, response) => {
+        drive.files.list(getSearchOptions(entity, options), async (err, response) => {
           if (err) {
             Logger.error({ err: err }, 'Error listing files');
             return done({
@@ -76,9 +77,18 @@ function doLookup(entities, options, cb) {
               data: null
             });
           } else {
-            files.forEach((file) => {
-              file._icon = mimeTypes[file.mimeType] ? mimeTypes[file.mimeType] : DEFAULT_FILE_ICON;
-              file._typeForUrl = getTypeForUrl(file);
+            // For each file, if it has a thumbnail, download the thumbnail
+            await async.eachOfLimit(files, MAX_PARALLEL_THUMBNAIL_DOWNLOADS, async (file) => {
+              try {
+                file._icon = mimeTypes[file.mimeType] ? mimeTypes[file.mimeType] : DEFAULT_FILE_ICON;
+                file._typeForUrl = getTypeForUrl(file);
+                if (file.hasThumbnail) {
+                  file._thumbnailBase64 = await downloadThumbnail(tokens.access_token, file.thumbnailLink);
+                }
+              } catch (downloadErr) {
+                Logger.error(downloadErr, 'Error downloading thumbnail');
+                file._thumbnailError = downloadErr;
+              }
             });
 
             lookupResults.push({
@@ -100,6 +110,18 @@ function doLookup(entities, options, cb) {
   });
 }
 
+async function downloadThumbnail(authToken, thumbnailUrl) {
+  const requestOptions = {
+    url: thumbnailUrl,
+    headers: {
+      Authorization: `Bearer ${authToken}`
+    },
+    responseType: 'arraybuffer'
+  };
+  const response = await gaxios.request(requestOptions);
+  return `data:image/png;charset=utf-8;base64,${Buffer.from(response.data, 'binary').toString('base64')}`;
+}
+
 function getTypeForUrl(file) {
   if (file.mimeType === 'application/vnd.google-apps.presentation') {
     return 'presentation';
@@ -117,7 +139,9 @@ function getSearchOptions(entity, options) {
       return {
         includeTeamDriveItems: true,
         supportsTeamDrives: true,
-        q: `fullText contains '${entity.value}'`
+        q: `fullText contains '${entity.value}'`,
+        fields:
+          'files(modifiedTime),files(mimeType),files(id),files(name),files(hasThumbnail),files(thumbnailLink),files(lastModifyingUser(displayName)),files(lastModifyingUser(photoLink)),files(iconLink)'
       };
     case 'drive':
       return {
@@ -125,14 +149,18 @@ function getSearchOptions(entity, options) {
         includeItemsFromAllDrives: true,
         corpora: 'drive',
         driveId: options.driveId,
-        q: `fullText contains '${entity.value}'`
+        q: `fullText contains '${entity.value}'`,
+        fields:
+          'files(modifiedTime),files(mimeType),files(id),files(name),files(hasThumbnail),files(thumbnailLink),files(lastModifyingUser(displayName)),files(lastModifyingUser(photoLink)),files(iconLink)'
       };
     case 'allDrives': {
       return {
         supportsAllDrives: true,
         includeItemsFromAllDrives: true,
         corpora: 'allDrives',
-        q: `fullText contains '${entity.value}'`
+        q: `fullText contains '${entity.value}'`,
+        fields:
+          'files(modifiedTime),files(mimeType),files(id),files(name),files(hasThumbnail),files(thumbnailLink),files(lastModifyingUser(displayName)),files(lastModifyingUser(photoLink)),files(iconLink)'
       };
     }
   }
@@ -159,8 +187,6 @@ function startup(logger) {
 
 function validateOptions(userOptions, cb) {
   let errors = [];
-
-  Logger.info(userOptions);
 
   let searchScope = userOptions.searchScope.value.value;
   let driveId = userOptions.driveId.value;

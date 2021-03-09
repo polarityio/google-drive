@@ -1,11 +1,12 @@
 {
   "main": "./integration.js",
   "name": "gdrive",
-  "version": "3.0.1-beta",
+  "version": "3.1.0-beta",
   "private": true,
   "dependencies": {
-    "async": "^2.6.2",
-    "googleapis": "^62.0.0"
+    "async": "^3.2.0",
+    "googleapis": "^67.1.1",
+    "gaxios": "^4.2.0"
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha --recursive"
