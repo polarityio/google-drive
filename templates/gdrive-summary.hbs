@@ -1,9 +1,11 @@
-{{#each details as |file|}}
+{{#each fileTags as |file|}}
     <span {{on "click" (optional this.scrollToIntegration)}} class="integration-summary-tag integration-background-color integration-border-color">
-       <span class="acronym integration-text-bold-color">{{block.acronym}}</span>
-        <span style="font-size: 12px">
-            {{fa-icon file._icon fixedWidth=true}}
-        </span>
-       <span class="integration-text-color">{{file.name}}</span>
+        <span class="acronym integration-text-bold-color">{{block.acronym}}</span>
+        {{#if file._icon}}
+            <span style="font-size: 12px">
+                {{fa-icon file._icon fixedWidth=true class="integration-text-color"}}
+            </span>
+        {{/if}}
+        <span class="integration-text-color">{{file.name}}</span>
     </span>
 {{/each}}
