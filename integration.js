@@ -72,10 +72,7 @@ function doLookup(entities, options, cb) {
           let files = response.data.files;
           if (files.length === 0) {
             Logger.trace('No files found.');
-            lookupResults.push({
-              entity: entity,
-              data: null
-            });
+            lookupResults.push({ entity, data: null });
           } else {
             // For each file, if it has a thumbnail, download the thumbnail
             await async.eachOfLimit(files, MAX_PARALLEL_THUMBNAIL_DOWNLOADS, async (file) => {
@@ -92,9 +89,9 @@ function doLookup(entities, options, cb) {
             });
 
             lookupResults.push({
-              entity: entity,
+              entity,
               data: {
-                summary: _getSummaryTags(files),
+                summary: [],// Tags obtain from details.  Must include empty array for summary tag components to render.
                 details: files
               }
             });
@@ -164,18 +161,6 @@ function getSearchOptions(entity, options) {
       };
     }
   }
-}
-
-function _getSummaryTags(files) {
-  let tags = files.slice(0, 5).map((file) => {
-    return file.name;
-  });
-
-  if (tags.length !== files.length) {
-    tags.push(`+${files.length - tags.length} more files`);
-  }
-
-  return tags;
 }
 
 function startup(logger) {
