@@ -24,6 +24,13 @@ module.exports = {
    */
   description: 'Google Drive Integration for Entity Searching',
   entityTypes: ['ip', 'email', 'domain', 'hash'],
+  customTypes: [
+    {
+      key: 'allText',
+      regex: /\S[\s\S]{0,256}\S/
+    }
+  ],
+  onDemandOnly: true,
   defaultColor: 'light-gray',
   /**
    * An array of style files (css or less) that will be included for your integration. Any styles specified in
@@ -119,6 +126,16 @@ module.exports = {
         'The ID of the Team Drive to search.  This option only has an effect if the `Search Scope` option is set to `[Specific Drive]`',
       default: '',
       type: 'text',
+      userCanEdit: true,
+      adminOnly: false
+    },
+    {
+      key: 'shouldGetFileContent',
+      name: 'Get File Content',
+      description:
+        'If checked, file results will display a content of the found file if available. (NOTE: This could increase search time)',
+      default: true,
+      type: 'boolean',
       userCanEdit: true,
       adminOnly: false
     }

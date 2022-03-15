@@ -53,7 +53,7 @@ auth:{
 
 ## Integration Options
 
-#### Search Scope
+### Search Scope
 
 The search scope for the integration dictates which files or Tream Drives will be searched.  There are three possible options:
 
@@ -82,9 +82,14 @@ The drive ID here is `0BLCYu7N598nTUk9PVA`.
 If selected, the service user will search all drives they've been access to.
 
 
-#### Drive ID to Search
+### Drive ID to Search
 
 The ID of the Team Drive to search.  This option only has an effect if the `Search Scope` option is set to `[Specific Drive]`
+
+### Get File Content
+If checked, file results will display a content of the found file if available. 
+> NOTE: This could increase search time
+
 
 ## About Polarity
 

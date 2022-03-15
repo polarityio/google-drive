@@ -5,8 +5,10 @@ const async = require('async');
 const config = require('./config/config');
 const gaxios = require('gaxios');
 const privateKey = require(config.auth.key);
+const textract = require('textract');
 const DRIVE_AUTH_URL = 'https://www.googleapis.com/auth/drive';
 const MAX_PARALLEL_THUMBNAIL_DOWNLOADS = 10;
+const { v4: uuidv4 } = require('uuid');
 
 const mimeTypes = {
   'application/vnd.google-apps.audio': 'file-audio',
@@ -31,9 +33,9 @@ const mimeTypes = {
 
 const DEFAULT_FILE_ICON = 'file';
 
-let jwtClient;
 let Logger;
-
+let jwtClient;
+let auth;
 /**
  *
  * @param entities
@@ -57,7 +59,8 @@ function doLookup(entities, options, cb) {
     async.forEach(
       entities,
       (entity, done) => {
-        let drive = google.drive({ version: 'v3', auth: jwtClient });
+        let drive = google.drive({ version: 'v3', auth });
+
         drive.files.list(getSearchOptions(entity, options), async (err, response) => {
           if (err) {
             Logger.error({ err: err }, 'Error listing files');
@@ -82,17 +85,22 @@ function doLookup(entities, options, cb) {
                 if (file.hasThumbnail) {
                   file._thumbnailBase64 = await downloadThumbnail(tokens.access_token, file.thumbnailLink);
                 }
+                if (options.shouldGetFileContent) {
+                  file._content = await getFileContent(drive, file);
+                }
               } catch (downloadErr) {
-                Logger.error(downloadErr, 'Error downloading thumbnail');
                 file._thumbnailError = downloadErr;
               }
             });
 
+            const searchTerm = entity.value.toLowerCase().trim();
+            const searchId = uuidv4();
+            const { files: updatedFiles, totalMatchCount } = addHighlightsHtml(files, searchTerm, searchId);
             lookupResults.push({
               entity,
               data: {
-                summary: [],// Tags obtain from details.  Must include empty array for summary tag components to render.
-                details: files
+                summary: [], // Tags obtain from details.  Must include empty array for summary tag components to render.
+                details: { files: updatedFiles, searchId, searchTerm, totalMatchCount }
               }
             });
           }
@@ -107,6 +115,38 @@ function doLookup(entities, options, cb) {
   });
 }
 
+function addHighlightsHtml(files, searchTerm, searchId) {
+  // Highlight search term
+  const searchTermRegex = new RegExp(`(?<!<[^>]*)${searchTerm}`, 'gi');
+  let matchCount = 1;
+  files.forEach((file, index) => {
+    if(!file._content) return;
+    const htmlRegex = /<[^>]*(>|$)|&nbsp;|&zwnj;|&raquo;|&laquo;|&gt;/g;
+    file._content = file._content.replace(htmlRegex, '');
+
+    // Remove strange characters
+    const badCharRegex = /â|Â&nbsp;|â|Â|â¢|â¢&#160|â;|â¢&#160;|âs|[^\x00-\x7F]/g;
+    file._content = file._content.replace(badCharRegex, '');
+    
+    const range = [];
+    range[0] = matchCount;
+    
+    file._content = file._content.replace(
+      searchTermRegex,
+      (match, offset) => { 
+        range[1] = matchCount++
+        return `<span class='highlight' id='${searchId}-${range[1]}'>${match}</span>`;}
+    );
+    file.range = range;
+    file.index = index
+  });
+
+  return {
+    files,
+    totalMatchCount: matchCount - 1
+  };
+}
+
 async function downloadThumbnail(authToken, thumbnailUrl) {
   const requestOptions = {
     url: thumbnailUrl,
@@ -117,6 +157,51 @@ async function downloadThumbnail(authToken, thumbnailUrl) {
   };
   const response = await gaxios.request(requestOptions);
   return `data:image/png;charset=utf-8;base64,${Buffer.from(response.data, 'binary').toString('base64')}`;
+}
+
+const MIME_EXPORT_TYPES = {
+  'application/vnd.google-apps.presentation': 'application/vnd.oasis.opendocument.presentation',
+  'application/vnd.google-apps.spreadsheet': 'text/csv',
+  'application/vnd.google-apps.document': 'application/vnd.oasis.opendocument.text',
+  'application/pdf': 'application/vnd.oasis.opendocument.presentation',
+  'application/vnd.google-apps.script': 'application/vnd.google-apps.script+json'
+};
+
+async function getFileContent(drive, file) {
+  const mimeType = MIME_EXPORT_TYPES[file.mimeType] || file.mimeType;
+  if (mimeType.includes('image') || mimeType.includes('jam') || mimeType.includes('jam')) return;
+
+  let requestResultBuffer;
+  try {
+    requestResultBuffer = await drive.files.export(
+      {
+        fileId: file.id,
+        mimeType: mimeType
+      },
+      {
+        responseType: 'arraybuffer'
+      }
+    );
+  } catch (error) {}
+  try {
+    requestResultBuffer = await drive.files.get({ fileId: file.id, alt: 'media' }, { responseType: 'arraybuffer' });
+  } catch (error) {}
+  try {
+    if (!requestResultBuffer) return;
+
+    const extractedText = await new Promise((res, rej) =>
+      textract.fromBufferWithMime(
+        mimeType,
+        new Buffer.from(requestResultBuffer.data, 'binary'),
+        { preserveLineBreaks: true },
+        function (error, text) {
+          if (error) return rej(error);
+          res(text);
+        }
+      )
+    );
+    return extractedText;
+  } catch (error) {}
 }
 
 function getTypeForUrl(file) {
@@ -166,8 +251,11 @@ function getSearchOptions(entity, options) {
 function startup(logger) {
   Logger = logger;
 
-  // configure a JWT auth client
   jwtClient = new google.auth.JWT(privateKey.client_email, null, privateKey.private_key, [DRIVE_AUTH_URL]);
+  auth = new google.auth.GoogleAuth({
+    keyFile: config.auth.key,
+    scopes: [DRIVE_AUTH_URL]
+  });
 }
 
 function validateOptions(userOptions, cb) {
