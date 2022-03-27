@@ -82,7 +82,7 @@ function doLookup(entities, options, cb) {
               try {
                 file._icon = mimeTypes[file.mimeType] ? mimeTypes[file.mimeType] : DEFAULT_FILE_ICON;
                 file._typeForUrl = getTypeForUrl(file);
-                if (file.hasThumbnail) {
+                if (file.hasThumbnail && options.shouldDisplayFileThumbnails) {
                   file._thumbnailBase64 = await downloadThumbnail(tokens.access_token, file.thumbnailLink);
                 }
                 if (options.shouldGetFileContent) {

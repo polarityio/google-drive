@@ -5,7 +5,9 @@
           {{#if file._thumbnailBase64}}
             <img class="file-thumbnail" src="{{file._thumbnailBase64}}"/>
           {{else}}
-            <img src="{{file.iconLink}}" class="file-icon-large"/> <span class="p-footnote ml-1">No preview available</span>
+            {{#if block.userOptions.shouldDisplayFileThumbnails}}
+              <img src="{{file.iconLink}}" class="file-icon-large"/> <span class="p-footnote ml-1">No preview available</span>
+            {{/if}}
           {{/if}}
         </div>
         <div class="file-meta-container">

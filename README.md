@@ -2,7 +2,7 @@
 
 ![image](https://img.shields.io/badge/status-beta-green.svg)
 
-Polarity's Google Drive integration gives users the ability to search files stored in a specified Google drive folder. This integration leverages the v3 drive API.
+Polarity's Google Drive integration gives users the ability to search files stored in a specified Google drive folder, and optionally return the file's thumbnail and unformatted text content. This integration leverages the v3 drive API.
 
 <img src="images/overlay.png" width="50%">
 
@@ -86,9 +86,12 @@ If selected, the service user will search all drives they've been access to.
 
 The ID of the Team Drive to search.  This option only has an effect if the `Search Scope` option is set to `[Specific Drive]`
 
-### Get File Content
-If checked, file results will display a content of the found file if available. 
-> NOTE: This could increase search time
+### Display File Thumbnails
+If checked, a found file's thumbnail will be display
+
+### Get Unformatted File Text Content
+If checked, a found file's unformatted text content will be displayed if it is available.
+> NOTE: This could increase search time if checked.
 
 
 ## About Polarity

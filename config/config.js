@@ -22,7 +22,8 @@ module.exports = {
    * @type String
    * @optional
    */
-  description: 'Google Drive Integration for Entity Searching',
+  description:
+    "Search Google Drive for files stored in a specified folder, and optionally return the file's thumbnail and unformatted text content.",
   entityTypes: ['ip', 'email', 'domain', 'hash'],
   customTypes: [
     {
@@ -130,11 +131,20 @@ module.exports = {
       adminOnly: false
     },
     {
-      key: 'shouldGetFileContent',
-      name: 'Get File Content',
-      description:
-        'If checked, file results will display a content of the found file if available. (NOTE: This could increase search time)',
+      key: 'shouldDisplayFileThumbnails',
+      name: 'Display File Thumbnails',
+      description: "If checked, a found file's thumbnail will be display",
       default: true,
+      type: 'boolean',
+      userCanEdit: true,
+      adminOnly: false
+    },
+    {
+      key: 'shouldGetFileContent',
+      name: 'Get Unformatted File Text Content',
+      description:
+        "If checked, a found file's unformatted text content will be displayed if it is available. (NOTE: This could increase search time if checked.)",
+      default: false,
       type: 'boolean',
       userCanEdit: true,
       adminOnly: false
