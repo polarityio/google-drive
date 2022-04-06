@@ -5,10 +5,12 @@ const async = require('async');
 const config = require('./config/config');
 const gaxios = require('gaxios');
 const privateKey = require(config.auth.key);
-const textract = require('textract');
 const DRIVE_AUTH_URL = 'https://www.googleapis.com/auth/drive';
 const MAX_PARALLEL_THUMBNAIL_DOWNLOADS = 10;
 const { v4: uuidv4 } = require('uuid');
+const getFileContentOnMessage = require('./src/getFileContentOnMessage');
+const getFileContent = require('./src/getFileContent');
+const addHighlightsHtml = require('./src/addHighlightsHtml');
 
 const mimeTypes = {
   'application/vnd.google-apps.audio': 'file-audio',
@@ -80,14 +82,24 @@ function doLookup(entities, options, cb) {
             // For each file, if it has a thumbnail, download the thumbnail
             await async.eachOfLimit(files, MAX_PARALLEL_THUMBNAIL_DOWNLOADS, async (file) => {
               try {
-                file._icon = mimeTypes[file.mimeType] ? mimeTypes[file.mimeType] : DEFAULT_FILE_ICON;
+                file._icon = mimeTypes[file.mimeType] || DEFAULT_FILE_ICON;
                 file._typeForUrl = getTypeForUrl(file);
-                if (file.hasThumbnail && options.shouldDisplayFileThumbnails) {
-                  file._thumbnailBase64 = await downloadThumbnail(tokens.access_token, file.thumbnailLink);
-                }
-                if (options.shouldGetFileContent) {
-                  file._content = await getFileContent(drive, file);
-                }
+
+                const isOneOfFirstThreeFiles = files.findIndex(({ id }) => file.id === id) < 3
+
+                const [_thumbnailBase64, _content] = await Promise.all([
+                  file.hasThumbnail && options.shouldDisplayFileThumbnails
+                    ? downloadThumbnail(tokens.access_token, file.thumbnailLink)
+                    : (async () => undefined)(),
+                  options.shouldGetFileContent && isOneOfFirstThreeFiles
+                    ? getFileContent(drive, file)
+                    : (async () =>
+                        options.shouldGetFileContent && !isOneOfFirstThreeFiles
+                          ? 'useOnMessageFileContentLookup'
+                          : undefined)()
+                ]);
+                file._thumbnailBase64 = _thumbnailBase64;
+                file._content = _content;
               } catch (downloadErr) {
                 file._thumbnailError = downloadErr;
               }
@@ -115,37 +127,6 @@ function doLookup(entities, options, cb) {
   });
 }
 
-function addHighlightsHtml(files, searchTerm, searchId) {
-  // Highlight search term
-  const searchTermRegex = new RegExp(`(?<!<[^>]*)${searchTerm}`, 'gi');
-  let matchCount = 1;
-  files.forEach((file, index) => {
-    if(!file._content) return;
-    const htmlRegex = /<[^>]*(>|$)|&nbsp;|&zwnj;|&raquo;|&laquo;|&gt;/g;
-    file._content = file._content.replace(htmlRegex, '');
-
-    // Remove strange characters
-    const badCharRegex = /â|Â&nbsp;|â|Â|â¢|â¢&#160|â;|â¢&#160;|âs|[^\x00-\x7F]/g;
-    file._content = file._content.replace(badCharRegex, '');
-    
-    const range = [];
-    range[0] = matchCount;
-    
-    file._content = file._content.replace(
-      searchTermRegex,
-      (match, offset) => { 
-        range[1] = matchCount++
-        return `<span class='highlight' id='${searchId}-${range[1]}'>${match}</span>`;}
-    );
-    file.range = range;
-    file.index = index
-  });
-
-  return {
-    files,
-    totalMatchCount: matchCount - 1
-  };
-}
 
 async function downloadThumbnail(authToken, thumbnailUrl) {
   const requestOptions = {
@@ -159,50 +140,6 @@ async function downloadThumbnail(authToken, thumbnailUrl) {
   return `data:image/png;charset=utf-8;base64,${Buffer.from(response.data, 'binary').toString('base64')}`;
 }
 
-const MIME_EXPORT_TYPES = {
-  'application/vnd.google-apps.presentation': 'application/vnd.oasis.opendocument.presentation',
-  'application/vnd.google-apps.spreadsheet': 'text/csv',
-  'application/vnd.google-apps.document': 'application/vnd.oasis.opendocument.text',
-  'application/pdf': 'application/vnd.oasis.opendocument.presentation',
-  'application/vnd.google-apps.script': 'application/vnd.google-apps.script+json'
-};
-
-async function getFileContent(drive, file) {
-  const mimeType = MIME_EXPORT_TYPES[file.mimeType] || file.mimeType;
-  if (mimeType.includes('image') || mimeType.includes('jam') || mimeType.includes('jam')) return;
-
-  let requestResultBuffer;
-  try {
-    requestResultBuffer = await drive.files.export(
-      {
-        fileId: file.id,
-        mimeType: mimeType
-      },
-      {
-        responseType: 'arraybuffer'
-      }
-    );
-  } catch (error) {}
-  try {
-    requestResultBuffer = await drive.files.get({ fileId: file.id, alt: 'media' }, { responseType: 'arraybuffer' });
-  } catch (error) {}
-  try {
-    if (!requestResultBuffer) return;
-
-    const extractedText = await new Promise((res, rej) =>
-      textract.fromBufferWithMime(
-        mimeType,
-        new Buffer.from(requestResultBuffer.data, 'binary'),
-        { preserveLineBreaks: true },
-        function (error, text) {
-          if (error) return rej(error);
-          res(text);
-        }
-      )
-    );
-    return extractedText;
-  } catch (error) {}
-}
 
 function getTypeForUrl(file) {
   if (file.mimeType === 'application/vnd.google-apps.presentation') {
@@ -274,8 +211,16 @@ function validateOptions(userOptions, cb) {
   cb(null, errors);
 }
 
+const getOnMessage = {
+  getFileContent: getFileContentOnMessage
+};
+
+const onMessage = ({ action, data: actionParams }, options, callback) =>
+  getOnMessage[action](actionParams, options, auth, callback, Logger);
+
 module.exports = {
-  doLookup: doLookup,
-  startup: startup,
-  validateOptions: validateOptions
+  startup,
+  validateOptions,
+  doLookup,
+  onMessage,
 };

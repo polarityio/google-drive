@@ -18,7 +18,31 @@
             <span class="file-meta">Last modified by {{file.lastModifyingUser.displayName}} {{moment-from file.modifiedTime}}</span>
           </div>
           {{#if file._content}}
-            {{#if (get expandableTitleStates index)}}
+            {{#if (eq file._content "useOnMessageFileContentLookup")}}
+              {{#if (get isRunningStates index)}}
+                <a
+                  href="#"
+                  class="expandable-title"
+                  disabled={{get isRunningStates index}}
+                >
+                  <span class="text">Hide Content {{fa-icon "spinner-third" fixedWidth=true spin=true}}</span> {{fa-icon "angle-up"}}
+                </a>
+              {{else if (get errorMessageStates index)}}
+                <span class="grayed-out">{{get errorMessageStates index}}</span>
+              {{else}}
+                <a
+                  href="#"
+                  class="expandable-title"
+                  {{on "click" (action "getFileContent" index)}}
+                >
+                  <span class="text">Show Content</span> {{fa-icon "angle-down"}}
+                </a>
+              {{/if}}
+            {{else if (eq file._content "No Content Found")}}
+                <div>
+                  <span class="file-meta grayed-out">No Content Found</span>
+                </div>
+            {{else if (get expandableTitleStates index)}}
               <a
                 href="#"
                 class="expandable-title"
