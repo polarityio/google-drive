@@ -32,7 +32,7 @@
               {{else}}
                 <a
                   href="#"
-                  class="expandable-title"
+                  class="expandable-title {{if gettingAFileRunning "disabled-title"}}"
                   {{on "click" (action "getFileContent" index)}}
                 >
                   <span class="text">Show Content</span> {{fa-icon "angle-down"}}
@@ -79,7 +79,7 @@
     </label>
     <div class="d-flex align-items-center">
       {{#if block._showHighlights}}
-        <span class="next-hit-stats">{{block._hitIndex}}/{{details.totalMatchCount}}</span>
+        <span class="next-hit-stats">{{block._hitIndex}}/{{if (not gettingAFileRunning) details.totalMatchCount}}{{#if gettingAFileRunning}}<span title="Loading Next File's Content">{{fa-icon "spinner-third" fixedWidth=true spin=true}}</span>{{else if (and moreFilesToOpen (not (eq details.totalMatchCount "?")))}}<span title="Not All File Content Opened">+</span>{{/if}}</span>
         <span {{action "previousHit"}} class="next-hit-button">{{fa-icon icon="chevron-up" fixedWidth=true}}</span>
         <span {{action "nextHit"}} class="next-hit-button ml-1">{{fa-icon icon="chevron-down" fixedWidth=true}}</span>
       {{/if}}

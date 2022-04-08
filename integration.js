@@ -9,8 +9,6 @@ const DRIVE_AUTH_URL = 'https://www.googleapis.com/auth/drive';
 const MAX_PARALLEL_THUMBNAIL_DOWNLOADS = 10;
 const { v4: uuidv4 } = require('uuid');
 const getFileContentOnMessage = require('./src/getFileContentOnMessage');
-const getFileContent = require('./src/getFileContent');
-const addHighlightsHtml = require('./src/addHighlightsHtml');
 
 const mimeTypes = {
   'application/vnd.google-apps.audio': 'file-audio',
@@ -85,34 +83,23 @@ function doLookup(entities, options, cb) {
                 file._icon = mimeTypes[file.mimeType] || DEFAULT_FILE_ICON;
                 file._typeForUrl = getTypeForUrl(file);
 
-                const isOneOfFirstThreeFiles = files.findIndex(({ id }) => file.id === id) < 3
-
-                const [_thumbnailBase64, _content] = await Promise.all([
+                file._thumbnailBase64 =
                   file.hasThumbnail && options.shouldDisplayFileThumbnails
-                    ? downloadThumbnail(tokens.access_token, file.thumbnailLink)
-                    : (async () => undefined)(),
-                  options.shouldGetFileContent && isOneOfFirstThreeFiles
-                    ? getFileContent(drive, file)
-                    : (async () =>
-                        options.shouldGetFileContent && !isOneOfFirstThreeFiles
-                          ? 'useOnMessageFileContentLookup'
-                          : undefined)()
-                ]);
-                file._thumbnailBase64 = _thumbnailBase64;
-                file._content = _content;
+                    ? await downloadThumbnail(tokens.access_token, file.thumbnailLink)
+                    : undefined;
+                file._content = options.shouldGetFileContent ? 'useOnMessageFileContentLookup' : undefined;
               } catch (downloadErr) {
                 file._thumbnailError = downloadErr;
               }
             });
 
-            const searchTerm = entity.value.toLowerCase().trim();
             const searchId = uuidv4();
-            const { files: updatedFiles, totalMatchCount } = addHighlightsHtml(files, searchTerm, searchId);
+
             lookupResults.push({
               entity,
               data: {
                 summary: [], // Tags obtain from details.  Must include empty array for summary tag components to render.
-                details: { files: updatedFiles, searchId, searchTerm, totalMatchCount }
+                details: { files, searchId, totalMatchCount: 0 }
               }
             });
           }
@@ -127,7 +114,6 @@ function doLookup(entities, options, cb) {
   });
 }
 
-
 async function downloadThumbnail(authToken, thumbnailUrl) {
   const requestOptions = {
     url: thumbnailUrl,
@@ -139,7 +125,6 @@ async function downloadThumbnail(authToken, thumbnailUrl) {
   const response = await gaxios.request(requestOptions);
   return `data:image/png;charset=utf-8;base64,${Buffer.from(response.data, 'binary').toString('base64')}`;
 }
-
 
 function getTypeForUrl(file) {
   if (file.mimeType === 'application/vnd.google-apps.presentation') {
@@ -222,5 +207,5 @@ module.exports = {
   startup,
   validateOptions,
   doLookup,
-  onMessage,
+  onMessage
 };

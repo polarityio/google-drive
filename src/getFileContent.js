@@ -12,7 +12,7 @@ const MIME_EXPORT_TYPES = {
 
 const getFileContent = async (drive, file) => {
   const mimeType = MIME_EXPORT_TYPES[file.mimeType] || file.mimeType;
-  if (mimeType.includes('image') || mimeType.includes('jam') || mimeType.includes('jam')) return;
+  if (mimeType.includes('image') || mimeType.includes('jam') ) return;
 
   let requestResultBuffer;
   try {

@@ -13,6 +13,7 @@ const getFileContentOnMessage = async (
   Logger
 ) => {
   try {
+    if (!file) return;
     let drive = google.drive({ version: 'v3', auth });
 
     file._content = (await getFileContent(drive, file)) || 'No Content Found';
