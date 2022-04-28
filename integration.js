@@ -7,6 +7,7 @@ const gaxios = require('gaxios');
 const privateKey = require(config.auth.key);
 const DRIVE_AUTH_URL = 'https://www.googleapis.com/auth/drive';
 const MAX_PARALLEL_THUMBNAIL_DOWNLOADS = 10;
+const { v4: uuidv4 } = require('uuid');
 
 const mimeTypes = {
   'application/vnd.google-apps.audio': 'file-audio',
@@ -31,9 +32,9 @@ const mimeTypes = {
 
 const DEFAULT_FILE_ICON = 'file';
 
-let jwtClient;
 let Logger;
-
+let jwtClient;
+let auth;
 /**
  *
  * @param entities
@@ -57,7 +58,8 @@ function doLookup(entities, options, cb) {
     async.forEach(
       entities,
       (entity, done) => {
-        let drive = google.drive({ version: 'v3', auth: jwtClient });
+        let drive = google.drive({ version: 'v3', auth });
+
         drive.files.list(getSearchOptions(entity, options), async (err, response) => {
           if (err) {
             Logger.error({ err: err }, 'Error listing files');
@@ -77,22 +79,25 @@ function doLookup(entities, options, cb) {
             // For each file, if it has a thumbnail, download the thumbnail
             await async.eachOfLimit(files, MAX_PARALLEL_THUMBNAIL_DOWNLOADS, async (file) => {
               try {
-                file._icon = mimeTypes[file.mimeType] ? mimeTypes[file.mimeType] : DEFAULT_FILE_ICON;
+                file._icon = mimeTypes[file.mimeType] || DEFAULT_FILE_ICON;
                 file._typeForUrl = getTypeForUrl(file);
-                if (file.hasThumbnail) {
-                  file._thumbnailBase64 = await downloadThumbnail(tokens.access_token, file.thumbnailLink);
-                }
+
+                file._thumbnailBase64 =
+                  file.hasThumbnail && options.shouldDisplayFileThumbnails
+                    ? await downloadThumbnail(tokens.access_token, file.thumbnailLink)
+                    : undefined;
               } catch (downloadErr) {
-                Logger.error(downloadErr, 'Error downloading thumbnail');
                 file._thumbnailError = downloadErr;
               }
             });
 
+            const searchId = uuidv4();
+
             lookupResults.push({
               entity,
               data: {
-                summary: [],// Tags obtain from details.  Must include empty array for summary tag components to render.
-                details: files
+                summary: [], // Tags obtain from details.  Must include empty array for summary tag components to render.
+                details: { files, searchId, totalMatchCount: 0 }
               }
             });
           }
@@ -166,8 +171,11 @@ function getSearchOptions(entity, options) {
 function startup(logger) {
   Logger = logger;
 
-  // configure a JWT auth client
   jwtClient = new google.auth.JWT(privateKey.client_email, null, privateKey.private_key, [DRIVE_AUTH_URL]);
+  auth = new google.auth.GoogleAuth({
+    keyFile: config.auth.key,
+    scopes: [DRIVE_AUTH_URL]
+  });
 }
 
 function validateOptions(userOptions, cb) {
@@ -187,7 +195,7 @@ function validateOptions(userOptions, cb) {
 }
 
 module.exports = {
-  doLookup: doLookup,
-  startup: startup,
-  validateOptions: validateOptions
+  startup,
+  validateOptions,
+  doLookup
 };

@@ -2,7 +2,7 @@
 
 ![image](https://img.shields.io/badge/status-beta-green.svg)
 
-Polarity's Google Drive integration gives users the ability to search files stored in a specified Google drive folder. This integration leverages the v3 drive API.
+Polarity's Google Drive integration gives users the ability to search files stored in a specified Google drive folder, and optionally return the file's thumbnail and unformatted text content. This integration leverages the v3 drive API.
 
 <img src="images/overlay.png" width="50%">
 
@@ -53,7 +53,7 @@ auth:{
 
 ## Integration Options
 
-#### Search Scope
+### Search Scope
 
 The search scope for the integration dictates which files or Tream Drives will be searched.  There are three possible options:
 
@@ -82,9 +82,13 @@ The drive ID here is `0BLCYu7N598nTUk9PVA`.
 If selected, the service user will search all drives they've been access to.
 
 
-#### Drive ID to Search
+### Drive ID to Search
 
 The ID of the Team Drive to search.  This option only has an effect if the `Search Scope` option is set to `[Specific Drive]`
+
+### Display File Thumbnails
+If checked, a found file's thumbnail will be displayed
+
 
 ## About Polarity
 

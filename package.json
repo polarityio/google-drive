@@ -1,11 +1,11 @@
 {
   "main": "./integration.js",
   "name": "gdrive",
-  "version": "3.1.1-beta",
+  "version": "3.2.0-beta",
   "private": true,
   "dependencies": {
     "async": "^3.2.0",
-    "googleapis": "^67.1.1",
-    "gaxios": "^4.2.0"
+    "gaxios": "^4.2.0",
+    "googleapis": "^97.0.0"
   }
 }

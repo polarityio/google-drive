@@ -1,11 +1,13 @@
 <div class="d-flex flex-wrap flex-container">
-  {{#each details as |file|}}
+  {{#each files as |file index|}}
       <div class="file-container">
         <div class="thumbnail-container">
           {{#if file._thumbnailBase64}}
             <img class="file-thumbnail" src="{{file._thumbnailBase64}}"/>
           {{else}}
-            <img src="{{file.iconLink}}" class="file-icon-large"/> <span class="p-footnote ml-1">No preview available</span>
+            {{#if block.userOptions.shouldDisplayFileThumbnails}}
+              <img src="{{file.iconLink}}" class="file-icon-large"/> <span class="p-footnote ml-1">No preview available</span>
+            {{/if}}
           {{/if}}
         </div>
         <div class="file-meta-container">
@@ -15,6 +17,7 @@
           <div>
             <span class="file-meta">Last modified by {{file.lastModifyingUser.displayName}} {{moment-from file.modifiedTime}}</span>
           </div>
+          
           {{!--
           <img class="last-updated-photo" src="{{file.lastModifyingUser.photoLink}}"/>
           --}}
