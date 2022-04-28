@@ -16,7 +16,7 @@ const getFileContentOnMessage = async (
     if (!file) return;
     let drive = google.drive({ version: 'v3', auth });
 
-    file._content = (await getFileContent(drive, file)) || 'No Content Found';
+    file._content = (await getFileContent(drive, file, Logger)) || 'No Content Found';
 
     const searchTerm = entity.value.toLowerCase().trim();
 

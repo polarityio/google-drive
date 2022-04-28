@@ -10,9 +10,19 @@ const MIME_EXPORT_TYPES = {
   'application/vnd.google-apps.script': 'application/vnd.google-apps.script+json'
 };
 
-const getFileContent = async (drive, file) => {
+const parseErrorToReadableJSON = (error) => JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+function streamToString(stream) {
+  const chunks = [];
+  return new Promise((resolve, reject) => {
+    stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+    stream.on('error', (err) => reject(err));
+    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+  });
+}
+
+const getFileContent = async (drive, file, Logger) => {
   const mimeType = MIME_EXPORT_TYPES[file.mimeType] || file.mimeType;
-  if (mimeType.includes('image') || mimeType.includes('jam') ) return;
+  if (mimeType.includes('image') || mimeType.includes('jam')) return;
 
   let requestResultBuffer;
   try {
@@ -25,10 +35,21 @@ const getFileContent = async (drive, file) => {
         responseType: 'arraybuffer'
       }
     );
-  } catch (error) {}
+  } catch (error) {
+    const err = parseErrorToReadableJSON(error);
+    Logger.trace({ MESSAGE: 'Failed to get File on Export for File', file, err });
+  }
   try {
-    requestResultBuffer = await drive.files.get({ fileId: file.id, alt: 'media' }, { responseType: 'arraybuffer' });
-  } catch (error) {}
+    requestResultBuffer = await drive.files.get(
+      { fileId: file.id, alt: 'media' },
+      {
+        responseType: 'arraybuffer'
+      }
+    );
+  } catch (error) {
+    const err = parseErrorToReadableJSON(error);
+    Logger.trace({ MESSAGE: 'Failed to get File Get for File', file, err });
+  }
   try {
     if (!requestResultBuffer) return;
 
@@ -44,7 +65,10 @@ const getFileContent = async (drive, file) => {
       )
     );
     return extractedText;
-  } catch (error) {}
+  } catch (error) {
+    const err = parseErrorToReadableJSON(error);
+    Logger.trace({ MESSAGE: 'Failed to Extract Text for File', file, err });
+  }
 };
 
 module.exports = getFileContent;
