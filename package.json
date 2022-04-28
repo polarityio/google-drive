@@ -6,7 +6,6 @@
   "dependencies": {
     "async": "^3.2.0",
     "gaxios": "^4.2.0",
-    "googleapis": "^97.0.0",
-    "textract": "^2.5.0"
+    "googleapis": "^97.0.0"
   }
 }

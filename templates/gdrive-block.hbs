@@ -17,52 +17,6 @@
           <div>
             <span class="file-meta">Last modified by {{file.lastModifyingUser.displayName}} {{moment-from file.modifiedTime}}</span>
           </div>
-          {{#if file._content}}
-            {{#if (eq file._content "useOnMessageFileContentLookup")}}
-              {{#if (get isRunningStates index)}}
-                <a
-                  href="#"
-                  class="expandable-title"
-                  disabled={{get isRunningStates index}}
-                >
-                  <span class="text">Hide Content {{fa-icon "spinner-third" fixedWidth=true spin=true}}</span> {{fa-icon "angle-up"}}
-                </a>
-              {{else if (get errorMessageStates index)}}
-                <span class="grayed-out">{{get errorMessageStates index}}</span>
-              {{else}}
-                <a
-                  href="#"
-                  class="expandable-title {{if gettingAFileRunning "disabled-title"}}"
-                  {{on "click" (action "getFileContent" index)}}
-                >
-                  <span class="text">Show Content</span> {{fa-icon "angle-down"}}
-                </a>
-              {{/if}}
-            {{else if (eq file._content "No Content Found")}}
-                <div>
-                  <span class="file-meta grayed-out">No Content Found</span>
-                </div>
-            {{else if (get expandableTitleStates index)}}
-              <a
-                href="#"
-                class="expandable-title"
-                {{on "click" (action "toggleExpandableTitle" index)}}
-              >
-                <span class="text">Hide Content</span> {{fa-icon "angle-up"}}
-              </a>
-              <div>
-                <span class="file-meta {{if block._showHighlights "show-highlights"}}">{{{file._content}}}</span>
-              </div>
-            {{else}}
-              <a
-                href="#"
-                class="expandable-title"
-                {{on "click" (action "toggleExpandableTitle" index)}}
-              >
-                <span class="text">Show Content</span> {{fa-icon "angle-down"}}
-              </a>
-            {{/if}}
-          {{/if}}
           
           {{!--
           <img class="last-updated-photo" src="{{file.lastModifyingUser.photoLink}}"/>
@@ -71,18 +25,3 @@
       </div>
   {{/each}}
 </div>
-{{#if details.totalMatchCount}}
-  <div class="next-hit-container">
-    <label>
-      <input type="checkbox" checked={{block._showHighlights}} onclick={{action (mut block._showHighlights) value="target.checked"}}>
-      <span class="checkbox-label">Highlight search terms</span>
-    </label>
-    <div class="d-flex align-items-center">
-      {{#if block._showHighlights}}
-        <span class="next-hit-stats">{{block._hitIndex}}/{{if (not gettingAFileRunning) details.totalMatchCount}}{{#if gettingAFileRunning}}<span title="Loading Next File's Content">{{fa-icon "spinner-third" fixedWidth=true spin=true}}</span>{{else if (and moreFilesToOpen (not (eq details.totalMatchCount "?")))}}<span title="Not All File Content Opened">+</span>{{/if}}</span>
-        <span {{action "previousHit"}} class="next-hit-button">{{fa-icon icon="chevron-up" fixedWidth=true}}</span>
-        <span {{action "nextHit"}} class="next-hit-button ml-1">{{fa-icon icon="chevron-down" fixedWidth=true}}</span>
-      {{/if}}
-    </div>
-  </div>
-{{/if}}

@@ -138,16 +138,6 @@ module.exports = {
       type: 'boolean',
       userCanEdit: true,
       adminOnly: false
-    },
-    {
-      key: 'shouldGetFileContent',
-      name: 'Get Unformatted File Text Content',
-      description:
-        "If checked, a found file's unformatted text content will be displayed if it is available. (NOTE: This could increase search time if checked.)",
-      default: false,
-      type: 'boolean',
-      userCanEdit: true,
-      adminOnly: false
     }
   ]
 };

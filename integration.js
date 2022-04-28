@@ -8,7 +8,6 @@ const privateKey = require(config.auth.key);
 const DRIVE_AUTH_URL = 'https://www.googleapis.com/auth/drive';
 const MAX_PARALLEL_THUMBNAIL_DOWNLOADS = 10;
 const { v4: uuidv4 } = require('uuid');
-const getFileContentOnMessage = require('./src/getFileContentOnMessage');
 
 const mimeTypes = {
   'application/vnd.google-apps.audio': 'file-audio',
@@ -87,7 +86,6 @@ function doLookup(entities, options, cb) {
                   file.hasThumbnail && options.shouldDisplayFileThumbnails
                     ? await downloadThumbnail(tokens.access_token, file.thumbnailLink)
                     : undefined;
-                file._content = options.shouldGetFileContent ? 'useOnMessageFileContentLookup' : undefined;
               } catch (downloadErr) {
                 file._thumbnailError = downloadErr;
               }
@@ -196,16 +194,8 @@ function validateOptions(userOptions, cb) {
   cb(null, errors);
 }
 
-const getOnMessage = {
-  getFileContent: getFileContentOnMessage
-};
-
-const onMessage = ({ action, data: actionParams }, options, callback) =>
-  getOnMessage[action](actionParams, options, auth, callback, Logger);
-
 module.exports = {
   startup,
   validateOptions,
-  doLookup,
-  onMessage
+  doLookup
 };

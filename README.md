@@ -89,10 +89,6 @@ The ID of the Team Drive to search.  This option only has an effect if the `Sear
 ### Display File Thumbnails
 If checked, a found file's thumbnail will be display
 
-### Get Unformatted File Text Content
-If checked, a found file's unformatted text content will be displayed if it is available.
-> NOTE: This could increase search time if checked.
-
 
 ## About Polarity
 
