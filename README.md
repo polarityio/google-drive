@@ -87,7 +87,7 @@ If selected, the service user will search all drives they've been access to.
 The ID of the Team Drive to search.  This option only has an effect if the `Search Scope` option is set to `[Specific Drive]`
 
 ### Display File Thumbnails
-If checked, a found file's thumbnail will be display
+If checked, a found file's thumbnail will be displayed
 
 
 ## About Polarity

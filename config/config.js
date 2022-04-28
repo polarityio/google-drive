@@ -133,7 +133,7 @@ module.exports = {
     {
       key: 'shouldDisplayFileThumbnails',
       name: 'Display File Thumbnails',
-      description: "If checked, a found file's thumbnail will be display",
+      description: "If checked, a found file's thumbnail will be displayed",
       default: true,
       type: 'boolean',
       userCanEdit: true,
