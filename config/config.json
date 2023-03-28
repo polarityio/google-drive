@@ -1,4 +1,5 @@
 {
+  "polarityIntegrationUuid": "ca973b10-cce1-11ed-aeee-075d3490155d",
   "name": "Google Drive",
   "acronym": "GDR",
   "description": "Search Google Drive for files stored in a specified folder, and optionally return the file's thumbnail and unformatted text content.",
