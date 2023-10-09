@@ -1,0 +1,120 @@
+<!--
+Copyright (c) 2023, Polarity.io, Inc.
+ -->
+<html>
+  <head>
+    <title>Polarity -- Google Drive Integration</title>
+    <link rel="icon" href="/_int/google-drive/images/favicon.png" type="image/png">
+    <style>
+        body {
+            font-family: sans-serif;
+            font-size: 14px;
+            line-height: 1.4em;
+            padding: 0px;
+            margin: 0px;
+            background-color: #212b32;
+            color: #fff;
+            margin-bottom: 20vh;
+        }
+
+        .center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+        }
+
+        .plus {
+            color: #888;
+            font-size: 50px;
+            margin: 0 30px;
+            flex: 0 0 auto;
+        }
+
+        .google-drive-text {
+            color: #fff;
+            font-size: 30px;
+            margin: 0 10px;
+            font-family: "Product Sans", "Google Sans", Arial, Helvetica, sans-serif;
+        }
+
+        .google-logo{
+            display:flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 0;
+            flex: 0 0 auto;
+        }
+
+        .google-logo img {
+            width: 50px;
+            height: 50px;
+        }
+
+        .polarity-logo {
+            flex: 0 1 auto;
+            min-width: 0;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 20px;
+            width: 600px;
+        }
+
+        .content {
+            width: 800px;
+        }
+
+        .success-text {
+            margin-top: 50px;
+            font-size: 30px;
+            line-height: 40px;
+        }
+
+        .times {
+            font-weight: 800;
+            color: #ff0000;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .info-text {
+            font-weight: normal;
+            font-size: 20px;
+            margin-top: 30px;
+            color: #aaa;
+            line-height: 25px;
+        }
+
+        a:link { color: #fff; text-decoration:none; }
+        a:visited { color: #fff; }
+        a:hover { color: #ddd; }
+        a:active { color: #fff; }
+    </style>
+  </head>
+  <body>
+    <div class="center">
+      <div class="content">
+        <div class="logo-container">
+          <img class="polarity-logo" src="/_int/google-drive/images/logo-white.svg">
+          <div class="plus">+</div>
+          <div class="google-logo">
+            <img src="/_int/google-drive/images/google-drive-logo.png">
+            <span class="google-drive-text">Google Drive</span>
+          </div>
+        </div>
+        <div class="success-text">
+          <span class="times">&#215;</span> Authentication to Google Drive failed.
+        </div>
+        <div class="info-text">
+          Re-run your search in Polarity to try authenticating again.  If the problem persists contact your Polarity Admin our Polarity support at <a href="mailto:support@polarity.io">support@polarity.io</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

@@ -84,12 +84,40 @@ module.exports = {
     ca: '',
     // An HTTP proxy to be used. Supports proxy Auth with Basic Auth, identical to support for
     // the url parameter (by embedding the auth info in the uri)
-    proxy: ""
+    proxy: ''
   },
   logging: {
     level: 'info' //trace, debug, info, warn, error, fatal
   },
   options: [
+    {
+      key: 'oauthClientId',
+      name: 'OAuth Client ID',
+      description: 'The Google Oauth 2.0 Client ID for your Polarity Google Drive integration app.',
+      default: '',
+      type: 'text',
+      userCanEdit: false,
+      adminOnly: true
+    },
+    {
+      key: 'oauthClientSecret',
+      name: 'OAuth Client Secret',
+      description: 'The Google OAuth Client secret that corresponds to the Client ID specified above.',
+      default: '',
+      type: 'password',
+      userCanEdit: false,
+      adminOnly: true
+    },
+    {
+      key: 'oauthRedirectHost',
+      name: 'OAuth Authorized Redirect Host',
+      description:
+        'The authorized redirect host for OAuth authorization requests.  This option should be set to the fully qualified domain name of your Polarity Server to include the scheme (i.e., https://).',
+      default: '',
+      type: 'text',
+      userCanEdit: false,
+      adminOnly: true
+    },
     {
       key: 'searchScope',
       name: 'Search Scope',

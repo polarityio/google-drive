@@ -1,5 +1,79 @@
-<div class="d-flex flex-wrap flex-container">
-  {{#each files as |file index|}}
+{{#if details.authUrl}}
+  <a href="{{details.authUrl}}" {{action "openAuthLink"}}>
+    Authorize Google Drive{{fa-icon icon="external-link-square" fixedWidth=true class="external-icon"}}
+  </a>
+  <div class="mt-1">
+    Click the link to authorize the Polarity Google Drive integration from your browser.  This link will expire after 2 minutes.
+  </div>
+  {{#if authLinkClicked}}
+    <div class="d-flex">
+      {{!--
+      <button class="btn btn-run-search" {{on "click" (action "verifyAuth")}}>
+        {{#if verifyingAuth}}
+          {{fa-icon icon="spinner-third" fixedWidth=true spin=true}}
+        {{else}}
+          Verify Auth
+        {{/if}}
+      </button>
+      <div>
+        {{#if isAuthenticated}}
+          {{fa-icon icon="check" class="text-success" fixedWidth=true}} Success! Authorization received.
+        {{else}}
+          {{#if isVerifying}}
+            {{fa-icon icon="spinner-third" spin=true fixedWidth=true}} Waiting for authorization.
+          {{else}}
+            Waiting for authorization.
+          {{/if}}
+        {{/if}}
+      </div>
+      --}}
+    </div>
+    {{!-- Auth Success/Failure/Expiration Container --}}
+    <div class="mt-2">
+      {{#if isAuthenticated}}
+        {{fa-icon icon="check" class="text-success" fixedWidth=true}} Success! Authorization received.
+      {{else if tokenExpired}}
+        {{fa-icon icon="exclamation-triangle" class="text-danger" fixedWidth=true}} Authorization request expired.  Re-run your search to re-authenticate.
+      {{else}}
+        <div class="p-footnote">
+          Waiting for successful authorization
+          {{#if isVerifying}}
+            {{fa-icon icon="spinner-third" spin=true fixedWidth=true}}
+          {{/if}}
+        </div>
+      {{/if}}
+    </div>
+    {{!-- Running Search Container --}}
+    {{#if isAuthenticated}}
+      <div class="mt-2">
+        {{#if searchRunning}}
+          {{fa-icon icon="spinner-third" fixedWidth=true spin=true}}
+          Running Search for {{pluralize details.entities.length "entity"}}.
+        {{else}}
+          {{fa-icon icon="check" class="text-success" fixedWidth=true}}
+          Ran Search for {{pluralize details.entities.length "entity"}}.
+        {{/if}}
+      </div>
+    {{/if}}
+
+  {{/if}}
+  {{!--
+  {{#if isAuthenticated}}
+    <button class="btn btn-run-search mt-2" {{on "click" (action "runSearch")}}>
+      {{#if searchRunning}}
+        {{fa-icon icon="spinner-third" fixedWidth=true spin=true}}
+      {{else}}
+        Run Search
+      {{/if}}
+    </button>
+    <div class="mt-2 p-footnote">
+      Click on the "Run Search" button to run your search now that you're authenticated with Google Drive.
+    </div>
+  {{/if}}
+  --}}
+{{else}}
+  <div class="d-flex flex-wrap flex-container">
+    {{#each files as |file index|}}
       <div class="file-container">
         <div class="thumbnail-container">
           {{#if file._thumbnailBase64}}
@@ -17,11 +91,12 @@
           <div>
             <span class="file-meta">Last modified by {{file.lastModifyingUser.displayName}} {{moment-from file.modifiedTime}}</span>
           </div>
-          
+
           {{!--
           <img class="last-updated-photo" src="{{file.lastModifyingUser.photoLink}}"/>
           --}}
         </div>
       </div>
-  {{/each}}
-</div>
+    {{/each}}
+  </div>
+{{/if}}

@@ -1,11 +1,18 @@
-{{#each fileTags as |file|}}
+{{#if details.authUrl}}
+  <span {{on "click" (optional this.scrollToIntegration)}} class="integration-summary-tag integration-background-color integration-border-color">
+    <span class="acronym integration-text-bold-color">{{block.acronym}}</span>
+    <span class="integration-text-color">Auth Required</span>
+  </span>
+{{else}}
+  {{#each fileTags as |file|}}
     <span {{on "click" (optional this.scrollToIntegration)}} class="integration-summary-tag integration-background-color integration-border-color">
         <span class="acronym integration-text-bold-color">{{block.acronym}}</span>
-        {{#if file._icon}}
-            <span style="font-size: 12px">
-                {{fa-icon file._icon fixedWidth=true class="integration-text-color"}}
-            </span>
-        {{/if}}
-        <span class="integration-text-color">{{file.name}}</span>
+      {{#if file._icon}}
+        <span style="font-size: 12px">
+          {{fa-icon file._icon fixedWidth=true class="integration-text-color"}}
+        </span>
+      {{/if}}
+      <span class="integration-text-color">{{file.name}}</span>
     </span>
-{{/each}}
+  {{/each}}
+{{/if}}

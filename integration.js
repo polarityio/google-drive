@@ -2,9 +2,13 @@
 
 const { google } = require('googleapis');
 const async = require('async');
+const crypto = require('crypto');
 const config = require('./config/config');
 const gaxios = require('gaxios');
 const privateKey = require(config.auth.key);
+const { setLogger } = require('./lib/logger');
+const authServerConfig = require('./config/auth-server-config.json');
+const AuthServer = require('./lib/auth-server');
 const DRIVE_AUTH_URL = 'https://www.googleapis.com/auth/drive';
 const MAX_PARALLEL_THUMBNAIL_DOWNLOADS = 10;
 const { v4: uuidv4 } = require('uuid');
@@ -33,83 +37,125 @@ const mimeTypes = {
 const DEFAULT_FILE_ICON = 'file';
 
 let Logger;
-let jwtClient;
 let auth;
+let oauthServer;
+
+function createAuthRequiredResult(entities, options) {
+  let { authUrl, stateToken } = oauthServer.createAuthClient(options)
+  return [
+    {
+      entity: {
+        ...entities[0],
+        value: 'Google Drive Auth Required'
+      },
+      data: {
+        summary: ['Auth Required'],
+        details: {
+          authUrl,
+          stateToken,
+          entities
+        }
+      }
+    }
+  ];
+}
+
+function getUserId(options) {
+  return options._request.user.id;
+}
+
 /**
  *
  * @param entities
  * @param options
  * @param cb
  */
-function doLookup(entities, options, cb) {
+async function doLookup(entities, options, cb) {
   Logger.debug({ entities: entities }, 'doLookup');
   let lookupResults = [];
 
-  //authenticate request
-  jwtClient.authorize(function (err, tokens) {
-    if (err) {
-      Logger.error({ err: err }, 'Failed to authorize client');
-      return cb({
-        detail: 'Failed to authenticate with Google Drive',
-        err: err
-      });
+  const userId = options._request.user.id;
+
+  // If oauth enabled
+  if (authServerConfig.enabled) {
+    if (oauthServer.hasAuthClient(userId)) {
+      // we already have an auth client for this user
+      Logger.debug({ userId: userId }, 'Using cached auth client for user');
+      auth = oauthServer.getAuthClient(userId);
+    } else {
+      // we need to return an auth request result which prompts the user
+      // to authenticate via oauth
+      return cb(null, createAuthRequiredResult(entities, options));
     }
+  }
 
-    async.forEach(
-      entities,
-      (entity, done) => {
-        let drive = google.drive({ version: 'v3', auth });
+  async.forEach(
+    entities,
+    (entity, done) => {
+      let drive = google.drive({
+        version: 'v3',
+        auth
+      });
 
-        drive.files.list(getSearchOptions(entity, options), async (err, response) => {
-          if (err) {
-            Logger.error({ err: err }, 'Error listing files');
-            return done({
-              detail: 'Failed to list files',
-              err: err
-            });
-          }
+      drive.files.list(getSearchOptions(entity, options), async (err, response) => {
+        if (err) {
+          return done({
+            detail: 'Failed to list files',
+            err: err,
+            code: err.code
+          });
+        }
 
-          Logger.trace(response);
+        Logger.trace(response);
 
-          let files = response.data.files;
-          if (files.length === 0) {
-            Logger.trace('No files found.');
-            lookupResults.push({ entity, data: null });
-          } else {
-            // For each file, if it has a thumbnail, download the thumbnail
-            await async.eachOfLimit(files, MAX_PARALLEL_THUMBNAIL_DOWNLOADS, async (file) => {
-              try {
-                file._icon = mimeTypes[file.mimeType] || DEFAULT_FILE_ICON;
-                file._typeForUrl = getTypeForUrl(file);
+        let files = response.data.files;
+        if (files.length === 0) {
+          Logger.trace('No files found.');
+          lookupResults.push({ entity, data: null });
+        } else {
+          // For each file, if it has a thumbnail, download the thumbnail
+          await async.eachOfLimit(files, MAX_PARALLEL_THUMBNAIL_DOWNLOADS, async (file) => {
+            try {
+              file._icon = mimeTypes[file.mimeType] || DEFAULT_FILE_ICON;
+              file._typeForUrl = getTypeForUrl(file);
 
-                file._thumbnailBase64 =
-                  file.hasThumbnail && options.shouldDisplayFileThumbnails
-                    ? await downloadThumbnail(tokens.access_token, file.thumbnailLink)
-                    : undefined;
-              } catch (downloadErr) {
-                file._thumbnailError = downloadErr;
-              }
-            });
+              file._thumbnailBase64 =
+                file.hasThumbnail && options.shouldDisplayFileThumbnails
+                  ? await downloadThumbnail(auth.access_token, file.thumbnailLink)
+                  : undefined;
+            } catch (downloadErr) {
+              file._thumbnailError = downloadErr;
+            }
+          });
 
-            const searchId = uuidv4();
+          const searchId = uuidv4();
 
-            lookupResults.push({
-              entity,
-              data: {
-                summary: [], // Tags obtain from details.  Must include empty array for summary tag components to render.
-                details: { files, searchId, totalMatchCount: 0 }
-              }
-            });
-          }
+          lookupResults.push({
+            entity,
+            data: {
+              summary: [],
+              details: { files, searchId, totalMatchCount: 0 }
+            }
+          });
+        }
 
-          done();
-        });
-      },
-      (err) => {
-        cb(err, lookupResults);
+        done();
+      });
+    },
+    (err) => {
+      if (err && err.code === 401 && authServerConfig.enabled) {
+        // Note that this error is expected if the integration is using OAuth authentication and
+        // the user's auth client has expired.  In this case we want to return an auth required result
+        Logger.debug({ err: err }, 'Auth Error, returning auth required result');
+        cb(null, createAuthRequiredResult(entities, options));
+      } else if (err) {
+        Logger.error({ err: err }, 'Error listing files');
+        cb(err, []);
+      } else {
+        cb(null, lookupResults);
       }
-    );
-  });
+    }
+  );
 }
 
 async function downloadThumbnail(authToken, thumbnailUrl) {
@@ -170,12 +216,16 @@ function getSearchOptions(entity, options) {
 
 function startup(logger) {
   Logger = logger;
+  setLogger(Logger);
 
-  jwtClient = new google.auth.JWT(privateKey.client_email, null, privateKey.private_key, [DRIVE_AUTH_URL]);
-  auth = new google.auth.GoogleAuth({
-    keyFile: config.auth.key,
-    scopes: [DRIVE_AUTH_URL]
-  });
+  if (authServerConfig.enabled) {
+    oauthServer = new AuthServer();
+  } else {
+    auth = new google.auth.GoogleAuth({
+      keyFile: config.auth.key,
+      scopes: [DRIVE_AUTH_URL]
+    });
+  }
 }
 
 function validateOptions(userOptions, cb) {
@@ -183,6 +233,10 @@ function validateOptions(userOptions, cb) {
 
   let searchScope = userOptions.searchScope.value.value;
   let driveId = userOptions.driveId.value;
+
+  if(authServerConfig.enabled) {
+
+  }
 
   if (searchScope === 'drive' && typeof driveId === 'string' && driveId.length === 0) {
     errors.push({
@@ -194,8 +248,30 @@ function validateOptions(userOptions, cb) {
   cb(null, errors);
 }
 
+function onMessage(payload, options, cb) {
+  Logger.trace({ payload }, 'onMessage request received');
+  switch (payload.action) {
+    case 'VERIFY_AUTH':
+      const requestingUserId = getUserId(options);
+      const isExpired = oauthServer.isStateTokenExpired(payload.stateToken);
+      const isAuthenticated = oauthServer.isAuthClientAuthenticated(requestingUserId);
+      Logger.trace({ isAuthenticated, isExpired, requestingUserId }, 'VERIFY_AUTH response');
+      cb(null, {
+        isAuthenticated,
+        isExpired
+      });
+      break;
+    default:
+      Logger.error({payload}, 'Invalid Action');
+      cb({
+        detail: 'Invalid Action'
+      });
+  }
+}
+
 module.exports = {
   startup,
   validateOptions,
-  doLookup
+  doLookup,
+  onMessage
 };
