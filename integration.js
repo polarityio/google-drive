@@ -5,7 +5,6 @@ const async = require('async');
 const crypto = require('crypto');
 const config = require('./config/config');
 const gaxios = require('gaxios');
-const privateKey = require(config.auth.key);
 const { setLogger } = require('./lib/logger');
 const authServerConfig = require('./config/auth-server-config.json');
 const AuthServer = require('./lib/auth-server');
