@@ -3,11 +3,7 @@
   "name": "Google Drive",
   "acronym": "GDR",
   "description": "Search Google Drive for files stored in a specified folder, and optionally return the file's thumbnail and unformatted text content.",
-  "entityTypes": [
-    "email",
-    "domain",
-    "hash"
-  ],
+  "entityTypes": ["IPv4", "IPv6", "email", "domain", "MD5", "SHA1", "SHA256"],
   "customTypes": [
     {
       "key": "allText",
@@ -16,9 +12,7 @@
   ],
   "onDemandOnly": true,
   "defaultColor": "light-gray",
-  "styles": [
-    "./styles/gdrive.less"
-  ],
+  "styles": ["./styles/gdrive.less"],
   "block": {
     "component": {
       "file": "./components/gdrive-block.js"
@@ -37,13 +31,6 @@
   },
   "auth": {
     "key": "./key/privatekey.json"
-  },
-  "request": {
-    "cert": "",
-    "key": "",
-    "passphrase": "",
-    "ca": "",
-    "proxy": ""
   },
   "logging": {
     "level": "info"

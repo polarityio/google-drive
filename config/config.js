@@ -24,7 +24,7 @@ module.exports = {
    */
   description:
     "Search Google Drive for files stored in a specified folder, and optionally return the file's thumbnail and unformatted text content.",
-  entityTypes: ['ip', 'email', 'domain', 'hash'],
+  entityTypes: ['IPv4', 'IPv6', 'email', 'domain', 'MD5', 'SHA1', 'SHA256'],
   customTypes: [
     {
       key: 'allText',
@@ -84,7 +84,7 @@ module.exports = {
     ca: '',
     // An HTTP proxy to be used. Supports proxy Auth with Basic Auth, identical to support for
     // the url parameter (by embedding the auth info in the uri)
-    proxy: ""
+    proxy: ''
   },
   logging: {
     level: 'info' //trace, debug, info, warn, error, fatal
