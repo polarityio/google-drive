@@ -13,6 +13,7 @@
     "SHA1",
     "SHA256",
     {
+      "type": "custom",
       "name": "All Text",
       "description": "Captures all searched text up to 256 characters",
       "editable": false,
