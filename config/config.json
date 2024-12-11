@@ -3,11 +3,30 @@
   "name": "Google Drive",
   "acronym": "GDR",
   "description": "Search Google Drive for files stored in a specified folder, and optionally return the file's thumbnail and unformatted text content.",
+  "supportsAdditionalCustomTypes": true,
+  "dataTypes": [
+    "IPv4",
+    "IPv6",
+    "email",
+    "domain",
+    "MD5",
+    "SHA1",
+    "SHA256",
+    {
+      "type": "custom",
+      "name": "All Text",
+      "description": "Captures all text between 2 and 256 characters",
+      "editable": false,
+      "enabled": true,
+      "key": "allText",
+      "regex": "\\S[\\s\\S]{2,256}\\S"
+    }
+  ],
   "entityTypes": ["IPv4", "IPv6", "email", "domain", "MD5", "SHA1", "SHA256"],
   "customTypes": [
     {
       "key": "allText",
-      "regex": "\\S[\\s\\S]{0,256}\\S"
+      "regex": "\\S[\\s\\S]{2,256}\\S"
     }
   ],
   "onDemandOnly": true,
