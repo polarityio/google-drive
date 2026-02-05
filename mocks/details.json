@@ -1,0 +1,82 @@
+{
+  "files": [
+    {
+      "modifiedTime": "2024-01-15T14:23:45.123Z",
+      "mimeType": "application/vnd.google-apps.document",
+      "id": "1abc-def-ghi-jkl-mno-pqr",
+      "name": "Quarterly Security Report Q4 2023.docx",
+      "hasThumbnail": true,
+      "thumbnailLink": "https://lh3.googleusercontent.com/drive-thumbnail/abc123",
+      "lastModifyingUser": {
+        "displayName": "John Smith",
+        "photoLink": "https://lh3.googleusercontent.com/a/profile-photo-123"
+      },
+      "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.document",
+      "_icon": "file-alt",
+      "_typeForUrl": "document",
+      "_thumbnailBase64": "data:image/png;charset=utf-8;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+    },
+    {
+      "modifiedTime": "2024-01-14T09:17:22.456Z",
+      "mimeType": "application/vnd.google-apps.spreadsheet",
+      "id": "2xyz-uvw-rst-opq-lmn",
+      "name": "Incident Response Log January 2024.xlsx",
+      "hasThumbnail": true,
+      "thumbnailLink": "https://lh3.googleusercontent.com/drive-thumbnail/xyz789",
+      "lastModifyingUser": {
+        "displayName": "Sarah Johnson",
+        "photoLink": "https://lh3.googleusercontent.com/a/profile-photo-456"
+      },
+      "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.spreadsheet",
+      "_icon": "file-spreadsheet",
+      "_typeForUrl": "spreadsheets"
+    },
+    {
+      "modifiedTime": "2024-01-13T16:45:11.789Z",
+      "mimeType": "application/pdf",
+      "id": "3klm-nop-qrs-tuv-wxy",
+      "name": "Vulnerability Assessment - Critical Findings.pdf",
+      "hasThumbnail": true,
+      "thumbnailLink": "https://lh3.googleusercontent.com/drive-thumbnail/def456",
+      "lastModifyingUser": {
+        "displayName": "Mike Chen",
+        "photoLink": "https://lh3.googleusercontent.com/a/profile-photo-789"
+      },
+      "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/pdf",
+      "_icon": "file-pdf",
+      "_typeForUrl": "document"
+    },
+    {
+      "modifiedTime": "2024-01-12T11:30:00.000Z",
+      "mimeType": "application/vnd.google-apps.presentation",
+      "id": "4abc-def-hij-klm-nop",
+      "name": "Security Awareness Training 2024.pptx",
+      "hasThumbnail": false,
+      "thumbnailLink": null,
+      "lastModifyingUser": {
+        "displayName": "Emily Rodriguez",
+        "photoLink": "https://lh3.googleusercontent.com/a/profile-photo-012"
+      },
+      "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.presentation",
+      "_icon": "presentation",
+      "_typeForUrl": "presentation"
+    },
+    {
+      "modifiedTime": "2024-01-11T08:22:33.567Z",
+      "mimeType": "text/plain",
+      "id": "5qrs-tuv-wxy-zab-cde",
+      "name": "access_logs_2024-01-10.txt",
+      "hasThumbnail": false,
+      "thumbnailLink": null,
+      "lastModifyingUser": {
+        "displayName": "David Kim",
+        "photoLink": "https://lh3.googleusercontent.com/a/profile-photo-345"
+      },
+      "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/text/plain",
+      "_icon": "file",
+      "_typeForUrl": "document"
+    }
+  ],
+  "searchId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "totalMatchCount": 5
+}

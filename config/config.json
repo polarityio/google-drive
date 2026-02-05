@@ -22,7 +22,15 @@
       "regex": "\\S[\\s\\S]{2,256}\\S"
     }
   ],
-  "entityTypes": ["IPv4", "IPv6", "email", "domain", "MD5", "SHA1", "SHA256"],
+  "entityTypes": [
+    "IPv4",
+    "IPv6",
+    "email",
+    "domain",
+    "MD5",
+    "SHA1",
+    "SHA256"
+  ],
   "customTypes": [
     {
       "key": "allText",
@@ -31,7 +39,9 @@
   ],
   "onDemandOnly": true,
   "defaultColor": "light-gray",
-  "styles": ["./styles/gdrive.less"],
+  "styles": [
+    "./styles/gdrive.less"
+  ],
   "block": {
     "component": {
       "file": "./components/gdrive-block.js"
@@ -100,5 +110,10 @@
       "userCanEdit": true,
       "adminOnly": false
     }
-  ]
+  ],
+  "reducer": {
+    "details": {
+      "file": "./reducers/details.json"
+    }
+  }
 }

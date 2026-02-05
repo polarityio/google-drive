@@ -1,0 +1,39 @@
+{
+  "root": {
+    "path": "",
+    "on_null": "return_empty"
+  },
+  "pipeline": [
+    {
+      "op": "copy",
+      "from": "files",
+      "to": "reduced_results"
+    },
+    {
+      "op": "project_and_replace",
+      "path": "reduced_results[]",
+      "keep_paths": [
+        "lastModifyingUser.displayName"
+      ]
+    },
+    {
+      "op": "rename",
+      "path": "reduced_results[].lastModifyingUser.displayName",
+      "to": "reduced_results[].last_modifying_user"
+    },
+    {
+      "op": "drop",
+      "paths": [
+        "reduced_results[].lastModifyingUser"
+      ]
+    },
+    {
+      "op": "prune",
+      "strategy": "empty_values",
+      "target": "reduced_results"
+    }
+  ],
+  "output": {
+    "result": "$working.reduced_results"
+  }
+}
